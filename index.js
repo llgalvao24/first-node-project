@@ -7,6 +7,13 @@ const projects = [];
 let counter = 0;
 
 //global middleware
+function logRequests(req, res, next){
+  counter++;
+  console.log(counter);
+  return next();
+}
+
+//local middleware
 function checkProjectExists(req, res, next){
   const { id } = req.params;
   const project = projects.find(p => p.id == id);
@@ -18,13 +25,9 @@ function checkProjectExists(req, res, next){
   return next();
 }
 
-app.use((req, res, next) => {
-  console.log(`Method: ${req.method}; URL: ${req.url}`);
-  console.log(counter++);
-  return next();
-});
+app.use(logRequests);
 
-
+//endpoinsts
 
 app.get('/projects', (req, res) =>{
   return res.json(projects);
@@ -52,7 +55,7 @@ app.post('/projects', (req, res) => {
   return res.json(projects);
 })
 
-app.put('/projects/:id', (req, res) => {
+app.put('/projects/:id', checkProjectExists, (req, res) => {
   const { id } = req.params;
   const { title } = req.body;
 
@@ -63,7 +66,7 @@ app.put('/projects/:id', (req, res) => {
   return res.json(project);
 });
 
-app.delete('/projects/:id', (req, res) => {
+app.delete('/projects/:id', checkProjectExists, (req, res) => {
   const { id } = req.params;
 
   const projectIndex = projects.findIndex(p => p.id == id);
@@ -73,7 +76,7 @@ app.delete('/projects/:id', (req, res) => {
   return res.send();
 })
 
-app.post('/projects/:id/tasks', (req, res) => {
+app.post('/projects/:id/tasks', checkProjectExists, (req, res) => {
   const { id } = req.params;
   const { title } = req.body;
 
