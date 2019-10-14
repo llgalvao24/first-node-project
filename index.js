@@ -4,14 +4,27 @@ const app = express();
 app.use(express.json());
 
 const projects = [];
+let counter = 0;
 
 //global middleware
-var counter = 1;
+function checkProjectExists(req, res, next){
+  const { id } = req.params;
+  const project = projects.find(p => p.id == id);
+
+  if(!project){
+    return res.status(400).json({error: 'Not found!'});
+  }
+
+  return next();
+}
+
 app.use((req, res, next) => {
   console.log(`Method: ${req.method}; URL: ${req.url}`);
   console.log(counter++);
   return next();
 });
+
+
 
 app.get('/projects', (req, res) =>{
   return res.json(projects);
